@@ -36,9 +36,24 @@ If FileExists($configFile) Then
     $hOrientationCombo = GUICtrlCreateCombo("", 140, 118, 180, 20, $CBS_DROPDOWNLIST)
     GUICtrlSetData($hOrientationCombo, "Portrait|Landscape")
 
-    ; Print Location dropdown
-    GUICtrlCreateLabel("Print Location:", 20, 160)
-    $hPrintLocationCombo = GUICtrlCreateCombo("", 140, 158, 180, 20, $CBS_DROPDOWNLIST)
+    ; Dropdown for Color (Color or Black and White)
+    GUICtrlCreateLabel("Color:", 20, 160)
+    $hColorCombo = GUICtrlCreateCombo("", 140, 158, 180, 20, $CBS_DROPDOWNLIST)
+    GUICtrlSetData($hColorCombo, "Color|Black and White")
+
+    ; Checkbox for Delay Print
+    $hDelayPrintCheckbox = GUICtrlCreateCheckbox("Delay Print", 20, 200)
+    $hDelayPrintDateInput = GUICtrlCreateDate("", 160, 195, 150, 20, $DTS_TIMEFORMAT)
+
+    ; Hide date and time input initially
+    GUICtrlSetState($hDelayPrintDateInput, $GUI_HIDE)
+
+    ; Checkbox for Flatten
+    $hFlattenCheckbox = GUICtrlCreateCheckbox("Flatten", 20, 230)
+
+    ; Checkbox for Print Location
+    GUICtrlCreateLabel("Print Location:", 20, 270)
+    $hPrintLocationCombo = GUICtrlCreateCombo("", 140, 268, 180, 20, $CBS_DROPDOWNLIST)
 
     ; Populate Print Location dropdown with subfolders of the configured location
     $location = IniRead($configFile, "Settings", "Location", "")
@@ -50,24 +65,11 @@ If FileExists($configFile) Then
         Next
     EndIf
 
-    ; Checkbox for Black and White
-    $hBlackWhiteCheckbox = GUICtrlCreateCheckbox("Black and White", 20, 200)
-
-    ; Checkbox for Flatten
-    $hFlattenCheckbox = GUICtrlCreateCheckbox("Flatten", 20, 230)
-
-    ; Checkbox for Delay Print
-    $hDelayPrintCheckbox = GUICtrlCreateCheckbox("Delay Print", 20, 260)
-    $hDelayPrintDateInput = GUICtrlCreateDate("", 160, 255, 150, 20, $DTS_TIMEFORMAT)
-
-    ; Hide date and time input initially
-    GUICtrlSetState($hDelayPrintDateInput, $GUI_HIDE)
-
     ; Submit button
-    $hSubmitButton = GUICtrlCreateButton("Submit", 280, 290, 100, 30)
+    $hSubmitButton = GUICtrlCreateButton("Submit", 280, 300, 100, 30)
 
     ; About button
-    $hAboutButton = GUICtrlCreateButton("About", 20, 290, 100, 30)
+    $hAboutButton = GUICtrlCreateButton("About", 20, 300, 100, 30)
 
     GUISetState(@SW_SHOW)
 
@@ -103,11 +105,11 @@ If FileExists($configFile) Then
                     IniWrite($destinationPath & "\" & StringRegExpReplace($pdfFileName, '[^a-zA-Z0-9_.]', '_') & ".ini", "PrintSettings", "Orientation", $orientation)
 
                     ; Check the checkboxes and set their values in the config file
-                    $blackWhite = GUICtrlRead($hBlackWhiteCheckbox)
+                    $color = GUICtrlRead($hColorCombo)
                     $flatten = GUICtrlRead($hFlattenCheckbox)
                     $delayPrint = GUICtrlRead($hDelayPrintCheckbox)
 
-                    IniWrite($destinationPath & "\" & StringRegExpReplace($pdfFileName, '[^a-zA-Z0-9_.]', '_') & ".ini", "AdvancedSettings", "BlackWhite", $blackWhite)
+                    IniWrite($destinationPath & "\" & StringRegExpReplace($pdfFileName, '[^a-zA-Z0-9_.]', '_') & ".ini", "AdvancedSettings", "Color", $color)
                     IniWrite($destinationPath & "\" & StringRegExpReplace($pdfFileName, '[^a-zA-Z0-9_.]', '_') & ".ini", "AdvancedSettings", "Flatten", $flatten)
 
                     If $delayPrint Then
