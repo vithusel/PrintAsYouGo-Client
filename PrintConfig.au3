@@ -4,6 +4,7 @@
 #include <ComboConstants.au3>
 #include <FileConstants.au3>
 #include <DateTimeConstants.au3>
+#include <Crypt.au3>
 
 ; Define the version information
 Global $version = "0.0.1"
@@ -16,7 +17,7 @@ Global $configFile = @ScriptDir & "\config.ini"
 
 If FileExists($configFile) Then
     ; Create the Print Configuration GUI
-    $hPrintGUI = GUICreate("Print Configuration", 400, -1) ; Height set to -1 for auto-adjustment
+    $hPrintGUI = GUICreate("Print Configuration", 400, 350) ; Height set to -1 for auto-adjustment
 
     ; Update the config file with the latest version
     UpdateConfigFile()
@@ -102,13 +103,18 @@ Case $hSubmitButton
         EndIf
 
         ; Copy the PDF file to the "Printing" folder
-        FileCopy($pdfFilePath, $printingFolder & "\" & StringRegExpReplace($pdfFileName, '[^a-zA-Z0-9_.]', '_'))
+        $destinationFilePath = $printingFolder & "\" & StringRegExpReplace($pdfFileName, '[^a-zA-Z0-9_.]', '_')
+        FileCopy($pdfFilePath, $destinationFilePath)
 
-        ; Create an INI file with page size and orientation information in the "Printing" folder
+        ; Generate MD5 hash of the PDF file
+        $md5Hash = _Crypt_HashFile($destinationFilePath, $CALG_MD5)
+
+        ; Create an INI file with page size, orientation, and MD5 hash information in the "Printing" folder
         $pageSize = GUICtrlRead($hPageSizeCombo)
         $orientation = GUICtrlRead($hOrientationCombo)
         IniWrite($printingFolder & "\" & StringRegExpReplace($pdfFileName, '[^a-zA-Z0-9_.]', '_') & ".ini", "PrintSettings", "PageSize", $pageSize)
         IniWrite($printingFolder & "\" & StringRegExpReplace($pdfFileName, '[^a-zA-Z0-9_.]', '_') & ".ini", "PrintSettings", "Orientation", $orientation)
+        IniWrite($printingFolder & "\" & StringRegExpReplace($pdfFileName, '[^a-zA-Z0-9_.]', '_') & ".ini", "PrintSettings", "MD5Hash", $md5Hash)
 
         ; Check the checkboxes and set their values in the INI file
         $color = GUICtrlRead($hColorCombo)
@@ -127,7 +133,7 @@ Case $hSubmitButton
             IniWrite($printingFolder & "\" & StringRegExpReplace($pdfFileName, '[^a-zA-Z0-9_.]', '_') & ".ini", "AdvancedSettings", "DelayPrintTime", "")
         EndIf
 
-        MsgBox($MB_ICONINFORMATION, "Success", "PDF file copied to the 'Printing' folder and settings saved.")
+        MsgBox($MB_ICONINFORMATION, "Success", "PDF file copied to the 'Printing' folder, settings saved, and MD5 hash included in the INI.")
     Else
         MsgBox($MB_ICONERROR, "Error", "Please select a PDF file and a print location.")
     EndIf
