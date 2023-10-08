@@ -58,6 +58,9 @@ Func ConfigSetup()
                     IniWrite($configFile, "Settings", "FullName", $fullName)
                     IniWrite($configFile, "Settings", "Company", $company)
                     IniWrite($configFile, "Settings", "EmailAddress", $email)
+					
+                    ; Update the config file with the latest version
+                    UpdateConfigFile()
                     
                     ; Close the GUI
                     GUIDelete($hMainGUI)
