@@ -62,20 +62,25 @@ If Not FileExists($configFile) Then
                 $company = GUICtrlRead($hCompanyInput)
                 $email = GUICtrlRead($hEmailInput)
                 
-                ; Write the values to the config file
-                IniWrite($configFile, "Settings", "Location", $location)
-                IniWrite($configFile, "Settings", "FullName", $fullName)
-                IniWrite($configFile, "Settings", "Company", $company)
-                IniWrite($configFile, "Settings", "EmailAddress", $email)
-                
-                ; Close the GUI
-                GUIDelete($hMainGUI)
-                
-                ; Set the setup complete flag to True
-                $setupComplete = True
-                
-                ; Exit the loop
-                ExitLoop
+                ; Check if all fields have values
+                If $location <> "" And $fullName <> "" And $company <> "" And $email <> "" Then
+                    ; Write the values to the config file
+                    IniWrite($configFile, "Settings", "Location", $location)
+                    IniWrite($configFile, "Settings", "FullName", $fullName)
+                    IniWrite($configFile, "Settings", "Company", $company)
+                    IniWrite($configFile, "Settings", "EmailAddress", $email)
+                    
+                    ; Close the GUI
+                    GUIDelete($hMainGUI)
+                    
+                    ; Set the setup complete flag to True
+                    $setupComplete = True
+                    
+                    ; Exit the loop
+                    ExitLoop
+                Else
+                    MsgBox($MB_ICONERROR, "Error", "Please fill in all fields.")
+                EndIf
             Case $hAboutButton
                 ShowAboutDetails()
         EndSwitch
