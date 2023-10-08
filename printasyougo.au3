@@ -70,6 +70,9 @@ If Not FileExists($configFile) Then
                     IniWrite($configFile, "Settings", "Company", $company)
                     IniWrite($configFile, "Settings", "EmailAddress", $email)
                     
+                    ; Update the config file with the latest version
+                    UpdateConfigFile()
+                    
                     ; Close the GUI
                     GUIDelete($hMainGUI)
                     
@@ -88,9 +91,12 @@ If Not FileExists($configFile) Then
 EndIf
 
 ; Check if the setup is complete and the config file exists
-If $setupComplete And FileExists($configFile) Then
+If FileExists($configFile) Then
     ; Create the Print Configuration GUI
     $hPrintGUI = GUICreate("Print Configuration", 400, 220)
+	
+	; Update the config file with the latest version
+	UpdateConfigFile()
     
     ; File upload button for PDFs
     GUICtrlCreateLabel("Upload PDF File:", 20, 20)
@@ -173,4 +179,9 @@ Func ShowAboutDetails()
         "Version: " & $version & @CRLF & _
         "Developer: " & $developer & @CRLF & _
         "Project Page: " & $projectPage)
+EndFunc
+
+Func UpdateConfigFile()
+    ; Update the config file with the latest version
+    IniWrite($configFile, "Settings", "Version", $version)
 EndFunc
