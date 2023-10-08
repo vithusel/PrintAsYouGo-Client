@@ -4,13 +4,19 @@
 #include <ComboConstants.au3>
 #include <FileConstants.au3>
 
+; Define the version information
+Global $version = "0.0.1"
+Global $appName = "Print As You Go"
+Global $developer = "Vithurshan Selvarajah"
+Global $projectPage = "https://example.com/printasyougo"
+
 ; Define the path to the config file
 Global $configFile = @ScriptDir & "\config.ini"
 
 ; Check if the config file exists
 If Not FileExists($configFile) Then
     ; Create a GUI for user input
-    $hMainGUI = GUICreate("Configuration Setup", 400, 220)
+    $hMainGUI = GUICreate("Configuration Setup", 400, 250)
     
     ; Location input
     GUICtrlCreateLabel("Location (Folder):", 20, 20)
@@ -29,6 +35,9 @@ If Not FileExists($configFile) Then
     
     ; OK button
     $hOKButton = GUICtrlCreateButton("OK", 150, 210, 100, 30)
+    
+    ; About button
+    $hAboutButton = GUICtrlCreateButton("About", 20, 210, 100, 30)
     
     GUISetState(@SW_SHOW)
     
@@ -61,6 +70,8 @@ If Not FileExists($configFile) Then
                 
                 ; Exit the loop
                 ExitLoop
+            Case $hAboutButton
+                ShowAboutDetails()
         EndSwitch
     WEnd
 Else
@@ -98,6 +109,9 @@ Else
     ; Submit button
     $hSubmitButton = GUICtrlCreateButton("Submit", 150, 190, 100, 30)
     
+    ; About button
+    $hAboutButton = GUICtrlCreateButton("About", 20, 190, 100, 30)
+    
     GUISetState(@SW_SHOW)
     
     ; Wait for the user to interact with the GUI
@@ -120,8 +134,7 @@ Else
                 ; Check if both fields are filled
                 If $pdfFilePath <> "" And $selectedLocation <> "" Then
                     ; Extract the filename from the PDF file path
-Local $pdfFileName = StringRegExpReplace($pdfFilePath, ".*\\", "")
-
+                    Local $pdfFileName = StringRegExpReplace($pdfFilePath, ".*\\", "")
                     
                     ; Copy the PDF file to the selected print location
                     $destinationPath = $location & "\" & $selectedLocation
@@ -137,6 +150,15 @@ Local $pdfFileName = StringRegExpReplace($pdfFilePath, ".*\\", "")
                 Else
                     MsgBox($MB_ICONERROR, "Error", "Please select a PDF file and a print location.")
                 EndIf
+            Case $hAboutButton
+                ShowAboutDetails()
         EndSwitch
     WEnd
 EndIf
+
+Func ShowAboutDetails()
+    MsgBox($MB_ICONINFORMATION, "About", "Application Name: " & $appName & @CRLF & _
+        "Version: " & $version & @CRLF & _
+        "Developer: " & $developer & @CRLF & _
+        "Project Page: " & $projectPage)
+EndFunc
