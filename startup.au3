@@ -3,10 +3,10 @@
 #include "ConfigSetup.au3"
 #include "PrintConfig.au3"
 
+
+
 ; Define the full process name for NextCloud
 Global $processName = "nextcloud.exe"
-
-
 
 ; Define the path to the config file
 Global $configFile = @ScriptDir & "\config.ini"
