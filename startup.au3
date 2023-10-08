@@ -6,7 +6,6 @@ Global $processName = "nextcloud.exe"
 ; Check if the NextCloud process is not running
 ConsoleWrite("Checking if NextCloud is running pre..." & @CRLF)
 If Not ProcessExists($processName) Then
-	ConsoleWrite("Checking if NextCloud is running post..." & @CRLF)
     MsgBox($MB_ICONERROR, "NextCloud not running", "NextCloud is currently not running. Please load it via the start menu before launching this program")
 	Exit ; Terminate the application  
 EndIf
