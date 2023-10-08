@@ -1,11 +1,11 @@
-#cs ----------------------------------------------------------------------------
+Func ShowAboutDetails()
+    MsgBox($MB_ICONINFORMATION, "About", "Application Name: " & $appName & @CRLF & _
+        "Version: " & $version & @CRLF & _
+        "Developer: " & $developer & @CRLF & _
+        "Project Page: " & $projectPage)
+EndFunc
 
- AutoIt Version: 3.3.16.1
- Author:         myName
-
- Script Function:
-	Template AutoIt script.
-
-#ce ----------------------------------------------------------------------------
-
-; Script Start - Add your code below here
+Func UpdateConfigFile()
+    ; Update the config file with the latest version
+    IniWrite($configFile, "Settings", "Version", $version)
+EndFunc
