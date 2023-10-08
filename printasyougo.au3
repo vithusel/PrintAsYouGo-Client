@@ -13,6 +13,9 @@ Global $projectPage = "https://example.com/printasyougo"
 ; Define the path to the config file
 Global $configFile = @ScriptDir & "\config.ini"
 
+; Create a flag to determine if the Configuration Setup is complete
+Global $setupComplete = False
+
 ; Check if the config file exists
 If Not FileExists($configFile) Then
     ; Create a GUI for user input
@@ -46,7 +49,7 @@ If Not FileExists($configFile) Then
         $nMsg = GUIGetMsg()
         Switch $nMsg
             Case $GUI_EVENT_CLOSE
-                Exit
+                ExitLoop ; Exit the loop when the GUI is closed
             Case $hBrowseButton
                 $folderPath = FileSelectFolder("Select a folder", "")
                 If Not @error Then
@@ -68,14 +71,20 @@ If Not FileExists($configFile) Then
                 ; Close the GUI
                 GUIDelete($hMainGUI)
                 
+                ; Set the setup complete flag to True
+                $setupComplete = True
+                
                 ; Exit the loop
                 ExitLoop
             Case $hAboutButton
                 ShowAboutDetails()
         EndSwitch
     WEnd
-Else
-    ; Create a different GUI for additional options if the config file exists
+EndIf
+
+; Check if the setup is complete and the config file exists
+If $setupComplete And FileExists($configFile) Then
+    ; Create the Print Configuration GUI
     $hPrintGUI = GUICreate("Print Configuration", 400, 220)
     
     ; File upload button for PDFs
@@ -114,18 +123,16 @@ Else
     
     GUISetState(@SW_SHOW)
     
-    ; Wait for the user to interact with the GUI
     While 1
         $nMsg = GUIGetMsg()
         Switch $nMsg
             Case $GUI_EVENT_CLOSE
-                Exit
+                Exit ; Exit the script when the GUI is closed
             Case $hBrowsePDFButton
                 $pdfFilePath = FileOpenDialog("Select a PDF file", @WorkingDir, "PDF Files (*.pdf)", 1)
                 If Not @error Then
                     GUICtrlSetData($hPDFFileInput, $pdfFilePath)
                 EndIf
-            ; Add a case for the Submit button
             Case $hSubmitButton
                 ; Retrieve the selected PDF file path
                 $pdfFilePath = GUICtrlRead($hPDFFileInput)
