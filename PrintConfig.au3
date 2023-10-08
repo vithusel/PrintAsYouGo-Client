@@ -83,48 +83,54 @@ If FileExists($configFile) Then
                 If Not @error Then
                     GUICtrlSetData($hPDFFileInput, $pdfFilePath)
                 EndIf
-            Case $hSubmitButton
-                ; Retrieve the selected PDF file path
-                $pdfFilePath = GUICtrlRead($hPDFFileInput)
-                ; Retrieve the selected print location
-                $selectedLocation = GUICtrlRead($hPrintLocationCombo)
-                ; Check if both fields are filled
-                If $pdfFilePath <> "" And $selectedLocation <> "" Then
-                    ; Extract the filename from the PDF file path
-                    Local $pdfFileName = StringRegExpReplace($pdfFilePath, ".*\\", "")
+Case $hSubmitButton
+    ; Retrieve the selected PDF file path
+    $pdfFilePath = GUICtrlRead($hPDFFileInput)
+    ; Retrieve the selected print location
+    $selectedLocation = GUICtrlRead($hPrintLocationCombo)
+    ; Check if both fields are filled
+    If $pdfFilePath <> "" And $selectedLocation <> "" Then
+        ; Extract the filename from the PDF file path
+        Local $pdfFileName = StringRegExpReplace($pdfFilePath, ".*\\", "")
 
-                    ; Copy the PDF file to the selected print location
-                    $location = IniRead($configFile, "Settings", "Location", "")
-                    $destinationPath = $location & "\" & $selectedLocation
-                    FileCopy($pdfFilePath, $destinationPath & "\" & StringRegExpReplace($pdfFileName, '[^a-zA-Z0-9_.]', '_'))
+        ; Create the "Printing" folder within the destination path if it doesn't exist
+        $location = IniRead($configFile, "Settings", "Location", "")
+        $destinationPath = $location & "\" & $selectedLocation
+        $printingFolder = $destinationPath & "\Printing"
+        If Not FileExists($printingFolder) Then
+            DirCreate($printingFolder)
+        EndIf
 
-                    ; Create an INI file with page size and orientation information
-                    $pageSize = GUICtrlRead($hPageSizeCombo)
-                    $orientation = GUICtrlRead($hOrientationCombo)
-                    IniWrite($destinationPath & "\" & StringRegExpReplace($pdfFileName, '[^a-zA-Z0-9_.]', '_') & ".ini", "PrintSettings", "PageSize", $pageSize)
-                    IniWrite($destinationPath & "\" & StringRegExpReplace($pdfFileName, '[^a-zA-Z0-9_.]', '_') & ".ini", "PrintSettings", "Orientation", $orientation)
+        ; Copy the PDF file to the "Printing" folder
+        FileCopy($pdfFilePath, $printingFolder & "\" & StringRegExpReplace($pdfFileName, '[^a-zA-Z0-9_.]', '_'))
 
-                    ; Check the checkboxes and set their values in the config file
-                    $color = GUICtrlRead($hColorCombo)
-                    $flatten = GUICtrlRead($hFlattenCheckbox)
-                    $delayPrint = GUICtrlRead($hDelayPrintCheckbox)
+        ; Create an INI file with page size and orientation information in the "Printing" folder
+        $pageSize = GUICtrlRead($hPageSizeCombo)
+        $orientation = GUICtrlRead($hOrientationCombo)
+        IniWrite($printingFolder & "\" & StringRegExpReplace($pdfFileName, '[^a-zA-Z0-9_.]', '_') & ".ini", "PrintSettings", "PageSize", $pageSize)
+        IniWrite($printingFolder & "\" & StringRegExpReplace($pdfFileName, '[^a-zA-Z0-9_.]', '_') & ".ini", "PrintSettings", "Orientation", $orientation)
 
-                    IniWrite($destinationPath & "\" & StringRegExpReplace($pdfFileName, '[^a-zA-Z0-9_.]', '_') & ".ini", "AdvancedSettings", "Color", $color)
-                    IniWrite($destinationPath & "\" & StringRegExpReplace($pdfFileName, '[^a-zA-Z0-9_.]', '_') & ".ini", "AdvancedSettings", "Flatten", $flatten)
+        ; Check the checkboxes and set their values in the INI file
+        $color = GUICtrlRead($hColorCombo)
+        $flatten = GUICtrlRead($hFlattenCheckbox)
+        $delayPrint = GUICtrlRead($hDelayPrintCheckbox)
 
-                    If $delayPrint Then
-                        ; Store the delay print time in the INI file
-                        $delayPrintTime = GUICtrlRead($hDelayPrintDateInput)
-                        IniWrite($destinationPath & "\" & StringRegExpReplace($pdfFileName, '[^a-zA-Z0-9_.]', '_') & ".ini", "AdvancedSettings", "DelayPrintTime", $delayPrintTime)
-                    Else
-                        ; Clear the delay print time in the INI file
-                        IniWrite($destinationPath & "\" & StringRegExpReplace($pdfFileName, '[^a-zA-Z0-9_.]', '_') & ".ini", "AdvancedSettings", "DelayPrintTime", "")
-                    EndIf
+        IniWrite($printingFolder & "\" & StringRegExpReplace($pdfFileName, '[^a-zA-Z0-9_.]', '_') & ".ini", "AdvancedSettings", "Color", $color)
+        IniWrite($printingFolder & "\" & StringRegExpReplace($pdfFileName, '[^a-zA-Z0-9_.]', '_') & ".ini", "AdvancedSettings", "Flatten", $flatten)
 
-                    MsgBox($MB_ICONINFORMATION, "Success", "PDF file copied and settings saved.")
-                Else
-                    MsgBox($MB_ICONERROR, "Error", "Please select a PDF file and a print location.")
-                EndIf
+        If $delayPrint Then
+            ; Store the delay print time in the INI file
+            $delayPrintTime = GUICtrlRead($hDelayPrintDateInput)
+            IniWrite($printingFolder & "\" & StringRegExpReplace($pdfFileName, '[^a-zA-Z0-9_.]', '_') & ".ini", "AdvancedSettings", "DelayPrintTime", $delayPrintTime)
+        Else
+            ; Clear the delay print time in the INI file
+            IniWrite($printingFolder & "\" & StringRegExpReplace($pdfFileName, '[^a-zA-Z0-9_.]', '_') & ".ini", "AdvancedSettings", "DelayPrintTime", "")
+        EndIf
+
+        MsgBox($MB_ICONINFORMATION, "Success", "PDF file copied to the 'Printing' folder and settings saved.")
+    Else
+        MsgBox($MB_ICONERROR, "Error", "Please select a PDF file and a print location.")
+    EndIf
             Case $hAboutButton
                 ShowAboutDetails()
             Case $hDelayPrintCheckbox
