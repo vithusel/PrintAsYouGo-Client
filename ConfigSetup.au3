@@ -42,32 +42,36 @@ Func ConfigSetup()
                 If Not @error Then
                     GUICtrlSetData($hLocationInput, $folderPath)
                 EndIf
-            Case $hOKButton
-                ; Retrieve values entered by the user
-                $location = GUICtrlRead($hLocationInput)
-                $fullName = GUICtrlRead($hFullNameInput)
-                $company = GUICtrlRead($hCompanyInput)
-                $email = GUICtrlRead($hEmailInput)
-                
-                ; Check if all fields have values
-                If $location = "" Or $fullName = "" Or $company = "" Or $email = "" Then
-                    MsgBox($MB_ICONERROR, "Error", "Please fill in all fields.")
-                Else
-                    ; Write the values to the config file
-                    IniWrite($configFile, "Settings", "Location", $location)
-                    IniWrite($configFile, "Settings", "FullName", $fullName)
-                    IniWrite($configFile, "Settings", "Company", $company)
-                    IniWrite($configFile, "Settings", "EmailAddress", $email)
-					
-                    ; Update the config file with the latest version
-                    UpdateConfigFile()
-                    
-                    ; Close the GUI
-                    GUIDelete($hMainGUI)
-                    
-                    ; Exit the loop
-                    ExitLoop
-                EndIf
+Case $hOKButton
+    ; Retrieve values entered by the user
+    $location = GUICtrlRead($hLocationInput)
+    $fullName = GUICtrlRead($hFullNameInput)
+    $company = GUICtrlRead($hCompanyInput)
+    $email = GUICtrlRead($hEmailInput)
+    
+    ; Check if all fields have values
+    If $location = "" Or $fullName = "" Or $company = "" Or $email = "" Then
+        MsgBox($MB_ICONERROR, "Error", "Please fill in all fields.")
+    Else
+        ; Write the values to the config file
+        IniWrite($configFile, "Settings", "Location", $location)
+        IniWrite($configFile, "Settings", "FullName", $fullName)
+        IniWrite($configFile, "Settings", "Company", $company)
+        IniWrite($configFile, "Settings", "EmailAddress", $email)
+        
+        ; Update the config file with the latest version
+        UpdateConfigFile()
+        
+        ; Close the GUI
+        GUIDelete($hMainGUI)
+        
+        ; Rerun the script (restart the application)
+        Run(@AutoItExe & ' "' & @ScriptFullPath & '"', @ScriptDir)
+        
+        ; Exit the current script instance
+        Exit
+    EndIf
+
             Case $hAboutButton
                 ShowAboutDetails()
         EndSwitch
