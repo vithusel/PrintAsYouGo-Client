@@ -40,6 +40,16 @@ If FileExists($configFile) Then
     GUICtrlCreateLabel("Print Location:", 20, 160)
     $hPrintLocationCombo = GUICtrlCreateCombo("", 140, 158, 180, 20, $CBS_DROPDOWNLIST)
 
+    ; Populate Print Location dropdown with subfolders of the configured location
+    $location = IniRead($configFile, "Settings", "Location", "")
+    $aSubfolders = _FileListToArray($location, "*", $FLTA_FOLDERS)
+    If IsArray($aSubfolders) Then
+        GUICtrlSetData($hPrintLocationCombo, $aSubfolders[1]) ; Set the default value
+        For $i = 2 To $aSubfolders[0]
+            GUICtrlSetData($hPrintLocationCombo, $aSubfolders[$i])
+        Next
+    EndIf
+
     ; Checkbox for Black and White
     $hBlackWhiteCheckbox = GUICtrlCreateCheckbox("Black and White", 20, 200)
 
@@ -92,21 +102,6 @@ If FileExists($configFile) Then
                     IniWrite($destinationPath & "\" & StringRegExpReplace($pdfFileName, '[^a-zA-Z0-9_.]', '_') & ".ini", "PrintSettings", "PageSize", $pageSize)
                     IniWrite($destinationPath & "\" & StringRegExpReplace($pdfFileName, '[^a-zA-Z0-9_.]', '_') & ".ini", "PrintSettings", "Orientation", $orientation)
 
-                    ; Check if "Delay Print" is ticked
-                    If GUICtrlRead($hDelayPrintCheckbox) Then
-                        ; Show date and time input
-                        GUICtrlSetState($hDelayPrintDateInput, $GUI_SHOW)
-                        ; Retrieve the selected delay print date and time
-                        $delayPrintTime = GUICtrlRead($hDelayPrintDateInput)
-                        ; Store the delay print time in the INI file
-                        IniWrite($destinationPath & "\" & StringRegExpReplace($pdfFileName, '[^a-zA-Z0-9_.]', '_') & ".ini", "AdvancedSettings", "DelayPrintTime", $delayPrintTime)
-                    Else
-                        ; Hide date and time input
-                        GUICtrlSetState($hDelayPrintDateInput, $GUI_HIDE)
-                        ; Clear the delay print time in the INI file
-                        IniWrite($destinationPath & "\" & StringRegExpReplace($pdfFileName, '[^a-zA-Z0-9_.]', '_') & ".ini", "AdvancedSettings", "DelayPrintTime", "")
-                    EndIf
-
                     ; Check the checkboxes and set their values in the config file
                     $blackWhite = GUICtrlRead($hBlackWhiteCheckbox)
                     $flatten = GUICtrlRead($hFlattenCheckbox)
@@ -114,7 +109,15 @@ If FileExists($configFile) Then
 
                     IniWrite($destinationPath & "\" & StringRegExpReplace($pdfFileName, '[^a-zA-Z0-9_.]', '_') & ".ini", "AdvancedSettings", "BlackWhite", $blackWhite)
                     IniWrite($destinationPath & "\" & StringRegExpReplace($pdfFileName, '[^a-zA-Z0-9_.]', '_') & ".ini", "AdvancedSettings", "Flatten", $flatten)
-                    IniWrite($destinationPath & "\" & StringRegExpReplace($pdfFileName, '[^a-zA-Z0-9_.]', '_') & ".ini", "AdvancedSettings", "DelayPrint", $delayPrint)
+
+                    If $delayPrint Then
+                        ; Store the delay print time in the INI file
+                        $delayPrintTime = GUICtrlRead($hDelayPrintDateInput)
+                        IniWrite($destinationPath & "\" & StringRegExpReplace($pdfFileName, '[^a-zA-Z0-9_.]', '_') & ".ini", "AdvancedSettings", "DelayPrintTime", $delayPrintTime)
+                    Else
+                        ; Clear the delay print time in the INI file
+                        IniWrite($destinationPath & "\" & StringRegExpReplace($pdfFileName, '[^a-zA-Z0-9_.]', '_') & ".ini", "AdvancedSettings", "DelayPrintTime", "")
+                    EndIf
 
                     MsgBox($MB_ICONINFORMATION, "Success", "PDF file copied and settings saved.")
                 Else
