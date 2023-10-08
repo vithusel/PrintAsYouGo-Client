@@ -1,5 +1,8 @@
 #include "Functions.au3"
 #include <MsgBoxConstants.au3>
+#include "ConfigSetup.au3"
+#include "PrintConfig.au3"
+
 ; Define the full process name for NextCloud
 Global $processName = "nextcloud.exe"
 
@@ -11,8 +14,7 @@ EndIf
 
 ; Define the path to the config file
 Global $configFile = @ScriptDir & "\config.ini"
-#include "ConfigSetup.au3"
-#include "PrintConfig.au3"
+
 ; Check if the config file exists
 If Not FileExists($configFile) Then
     ; Launch the Configuration Setup
