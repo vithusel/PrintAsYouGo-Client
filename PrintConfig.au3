@@ -9,10 +9,10 @@
 #include <Misc.au3>
 
 ; Define the version information
-Global $version = "0.0.1"
+Global $version = "0.0.2"
 Global $appName = "Print As You Go"
 Global $developer = "Vithurshan Selvarajah"
-Global $projectPage = "https://example.com/printasyougo"
+Global $projectPage = "https://git.vithuselservices.co.uk/vithusel/printasyougo"
 
 Func PrintConfig()
     ; Define the path to the config file
