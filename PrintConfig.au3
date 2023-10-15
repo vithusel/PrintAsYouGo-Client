@@ -125,41 +125,41 @@ Func HandlePDFPrinting($hPDFFileInput, $hPrintLocationCombo, $hPageSizeCombo, $h
         $destinationFilePath = $printingFolder & "\" & StringRegExpReplace($pdfFileName, '[^a-zA-Z0-9_.]', '_')
 
         ; Check for existing files with the same name in the "Printing" folder
-If FileExists($destinationFilePath) Then
-    Local $overwrite = MsgBox($MB_YESNO + $MB_ICONQUESTION, "File Exists", "A file with the same name already exists in the 'Printing' folder. Do you want to overwrite it?")
-    If $overwrite = $IDYES Then
-        ; Move the existing file to the archive folder
-        $archiveFolder = $printingFolder & "\Archive"
-        If Not FileExists($archiveFolder) Then
-            DirCreate($archiveFolder)
-        EndIf
-        
-        ; Build the destination file path in the archive folder
-        $timestamp = @YEAR & "-" & @MON & "-" & @MDAY & "-" & @HOUR & "-" & @MIN & "-" & @SEC
-        $archivePdfFilePath = $archiveFolder & "\" & StringRegExpReplace($pdfFileName, '[^a-zA-Z0-9_.]', '_') & "-" & $timestamp & ".pdf"
-        $archiveIniFilePath = $archiveFolder & "\" & StringRegExpReplace($pdfFileName, '[^a-zA-Z0-9_.]', '_') & "-" & $timestamp & ".ini"
+        If FileExists($destinationFilePath) Then
+            Local $overwrite = MsgBox($MB_YESNO + $MB_ICONQUESTION, "File Exists", "A file with the same name already exists in the 'Printing' folder. Do you want to overwrite it?")
+            If $overwrite = $IDYES Then
+                ; Move the existing file to the archive folder
+                $archiveFolder = $printingFolder & "\Archive"
+                If Not FileExists($archiveFolder) Then
+                    DirCreate($archiveFolder)
+                EndIf
 
-        ; Copy the existing INI file to the archive folder
-        $existingIniPath = $destinationFilePath & ".ini"
-        If FileExists($existingIniPath) Then
-            FileCopy($existingIniPath, $archiveIniFilePath, 1)
-            
-            ; Append the copied INI file with username and machine name
-            IniWrite($archiveIniFilePath, "Intervention", "UserName", @UserName)
-            IniWrite($archiveIniFilePath, "Intervention", "MachineName", @ComputerName)
+                ; Build the destination file path in the archive folder
+                $timestamp = @YEAR & "-" & @MON & "-" & @MDAY & "-" & @HOUR & "-" & @MIN & "-" & @SEC
+                $archivePdfFilePath = $archiveFolder & "\" & StringRegExpReplace($pdfFileName, '[^a-zA-Z0-9_.]', '_') & "-" & $timestamp & ".pdf"
+                $archiveIniFilePath = $archiveFolder & "\" & StringRegExpReplace($pdfFileName, '[^a-zA-Z0-9_.]', '_') & "-" & $timestamp & ".ini"
+
+                ; Copy the existing INI file to the archive folder
+                $existingIniPath = $destinationFilePath & ".ini"
+                If FileExists($existingIniPath) Then
+                    FileCopy($existingIniPath, $archiveIniFilePath, 1)
+
+                    ; Append the copied INI file with username and machine name
+                    IniWrite($archiveIniFilePath, "Intervention", "UserName", @UserName)
+                    IniWrite($archiveIniFilePath, "Intervention", "MachineName", @ComputerName)
+                EndIf
+
+                ; Move the existing PDF file to the archive folder with the timestamp
+                If FileMove($destinationFilePath, $archivePdfFilePath, 1) Then
+                    MsgBox($MB_ICONINFORMATION, "Success", "File overwritten and moved to the 'Archive' folder with timestamp in the filename.")
+                Else
+                    MsgBox($MB_ICONERROR, "Error", "Failed to move the existing file to the 'Archive' folder.")
+                    Return
+                EndIf
+            Else
+                Return
+            EndIf
         EndIf
-        
-        ; Move the existing PDF file to the archive folder with the timestamp
-        If FileMove($destinationFilePath, $archivePdfFilePath, 1) Then
-            MsgBox($MB_ICONINFORMATION, "Success", "File overwritten and moved to the 'Archive' folder with timestamp in the filename.")
-        Else
-            MsgBox($MB_ICONERROR, "Error", "Failed to move the existing file to the 'Archive' folder.")
-            Return
-        EndIf
-    Else
-        Return
-    EndIf
-EndIf
 
         ; Copy the PDF file to the printing folder
         If Not FileCopy($pdfFilePath, $destinationFilePath, 1) Then
@@ -170,12 +170,13 @@ EndIf
         ; Generate MD5 hash of the PDF file
         $md5Hash = _Crypt_HashFile($destinationFilePath, $CALG_MD5)
 
-        ; Create an INI file with page size, orientation, and MD5 hash information in the "Printing" folder
+        ; Create an INI file with page size, orientation, MD5 hash, and file name information in the "Printing" folder
         $pageSize = GUICtrlRead($hPageSizeCombo)
         $orientation = GUICtrlRead($hOrientationCombo)
         IniWrite($destinationFilePath & ".ini", "PrintSettings", "PageSize", $pageSize)
         IniWrite($destinationFilePath & ".ini", "PrintSettings", "Orientation", $orientation)
         IniWrite($destinationFilePath & ".ini", "PrintSettings", "MD5Hash", $md5Hash)
+        IniWrite($destinationFilePath & ".ini", "PrintSettings", "FileName", $pdfFileName) ; Add this line
 
         ; Get the current date and time
         $submissionDateTime = @YEAR & "/" & @MON & "/" & @MDAY & " " & @HOUR & ":" & @MIN & ":" & @SEC
@@ -219,4 +220,3 @@ EndIf
 EndFunc
 
 PrintConfig()
-
