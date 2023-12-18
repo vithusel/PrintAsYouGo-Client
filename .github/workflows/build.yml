@@ -1,0 +1,45 @@
+name: Build with PyInstaller
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 16
+
+    - name: Install dependencies
+      run: |
+        python -v
+        python -m pip install --upgrade pip --no-build-isolation
+        python -m pip install -r requirements.txt --no-build-isolation
+
+    - name: Install PyInstaller
+      run: |
+        python -m pip install pyinstaller --no-build-isolation
+        
+    - name: Build with PyInstaller
+      run: |
+        python -m PyInstaller --onefile --noconsole --icon=logo.ico --add-data "manifest.ini:." --add-data "logo.ico:." --name PAYG-v0.0.4.exe launch.py
+      # Add any additional PyInstaller flags or configurations as needed
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: dist
+        path: dist
