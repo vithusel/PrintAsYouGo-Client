@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - Staging
 
 jobs:
   build:
@@ -32,14 +33,42 @@ jobs:
     - name: Install PyInstaller
       run: |
         python -m pip install pyinstaller --no-build-isolation
-        
+
+    - name: Get version from manifest.ini
+      id: version
+      run: |
+        version=$(grep 'Version' manifest.ini | cut -d'=' -f2 | tr -d '[:space:]')
+        echo "Version found in manifest.ini: $version"
+        echo "::set-output name=version::$version"
+
     - name: Build with PyInstaller
       run: |
-        python -m PyInstaller --onefile --noconsole --icon=logo.ico --add-data "manifest.ini:." --add-data "logo.ico:." --name PAYG-v0.0.4.exe launch.py
-      # Add any additional PyInstaller flags or configurations as needed
+        if [ "${{ github.event_name }}" == "push" ]; then
+          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            output_name="payg-version.exe"
+          elif [ "${{ github.ref }}" == "refs/heads/Staging" ]; then
+            output_name="payg-version-debug.exe"
+          else
+            output_name="PAYG.exe"
+          fi
+        else
+          output_name="PAYG.exe"
+        fi
+
+        python -m PyInstaller --onefile --noconsole --icon=logo.ico --add-data "manifest.ini:." --add-data "logo.ico:." --name $output_name launch.py
 
     - name: Upload artifact
       uses: actions/upload-artifact@v2
       with:
         name: dist
         path: dist
+
+    - name: Create release
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main' || github.ref == 'refs/heads/Staging'
+      uses: softprops/action-gh-release@v1
+      with:
+        files: dist/*
+        tag_name: ${{ github.ref }}
+        title: "Release ${{ github.ref }} - Version ${{ steps.version.outputs.version }}"
+        body: |
+          Release ${{ github.ref }} - Version ${{ steps.version.outputs.version }}
