@@ -4,7 +4,9 @@ on:
   push:
     branches:
       - main
-      - Staging
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -37,38 +39,25 @@ jobs:
     - name: Get version from manifest.ini
       id: version
       run: |
-        version=$(grep 'Version' manifest.ini | cut -d'=' -f2 | tr -d '[:space:]')
-        echo "Version found in manifest.ini: $version"
-        echo "::set-output name=version::$version"
+        $version = (Get-Content manifest.ini | Select-String -Pattern 'Version' | ForEach-Object { $_.ToString().Split('=')[1].Trim() })
+        Write-Host "Version found in manifest.ini: $version"
+        Write-Output "##vso[task.setvariable variable=version;isOutput=true]$version"
 
     - name: Build with PyInstaller
       run: |
-        if [ "${{ github.event_name }}" == "push" ]; then
-          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
-            output_name="payg-version.exe"
-          elif [ "${{ github.ref }}" == "refs/heads/Staging" ]; then
-            output_name="payg-version-debug.exe"
-          else
-            output_name="PAYG.exe"
-          fi
-        else
-          output_name="PAYG.exe"
-        fi
+        # Get version from manifest.ini
+        $version = (Get-Content manifest.ini | Select-String -Pattern 'Version' | ForEach-Object { $_.ToString().Split('=')[1].Trim() })
+        Write-Host "Version found in manifest.ini: $version"
+        Write-Output "##vso[task.setvariable variable=version;isOutput=true]$version"
+
+        # Determine output_name based on branch
+        $output_name = "payg-$($version).exe"
 
         python -m PyInstaller --onefile --noconsole --icon=logo.ico --add-data "manifest.ini:." --add-data "logo.ico:." --name $output_name launch.py
 
     - name: Upload artifact
       uses: actions/upload-artifact@v2
       with:
-        name: dist
-        path: dist
+        name: payg-artifacts  # Specify a name for the artifact
+        path: dist/payg-*.exe  # Use a wildcard to match files with the pattern
 
-    - name: Create release
-      if: github.event_name == 'push' && github.ref == 'refs/heads/main' || github.ref == 'refs/heads/Staging'
-      uses: softprops/action-gh-release@v1
-      with:
-        files: dist/*
-        tag_name: ${{ github.ref }}
-        title: "Release ${{ github.ref }} - Version ${{ steps.version.outputs.version }}"
-        body: |
-          Release ${{ github.ref }} - Version ${{ steps.version.outputs.version }}
