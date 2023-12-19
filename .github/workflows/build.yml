@@ -53,7 +53,7 @@ jobs:
         # Determine output_name based on branch
         $output_name = "payg-$($version).exe"
 
-        python -m PyInstaller --onefile --noconsole --icon=logo.ico --add-data "manifest.ini:." --add-data "logo.ico:." --name $output_name launch.py
+        python -m PyInstaller --onefile --noconsole --version-file=version_file.txt --icon=logo.ico --add-data "manifest.ini:." --add-data "logo.ico:." --name $output_name launch.py
 
     - name: Upload artifact
       uses: actions/upload-artifact@v2
