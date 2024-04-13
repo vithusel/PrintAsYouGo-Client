@@ -2,3 +2,4 @@
 config.ini
 payg.exe
 startup.exe
+__pycache__/
