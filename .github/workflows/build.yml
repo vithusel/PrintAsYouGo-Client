@@ -59,7 +59,7 @@ jobs:
         python -m PyInstaller --onefile --noconsole --version-file=version_file.txt --icon=logo.ico --add-data "manifest.ini:." --add-data "logo.ico:." --name $output_name launch.py
 
     - name: Upload artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: payg-artifacts  # Specify a name for the artifact
         path: dist/payg-*.exe  # Use a wildcard to match files with the pattern
