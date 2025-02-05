@@ -7,7 +7,6 @@ A python application designed to allow end users to submit files to print at a r
 ## System Requirments
 - Windows
 - MacOS
-- 
 ## Installation
 The application when compiled is just run as a exe. There is no installer packaged with this and is designed to be installed via RMM
    
